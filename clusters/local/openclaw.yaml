@@ -56,7 +56,12 @@ spec:
                         "userTimezone": "UTC",
                         "timeoutSeconds": 600,
                         "maxConcurrent": 1,
-                        "thinkingDefault": "off"
+                        "thinkingDefault": "off",
+                        "compaction": {
+                          "reserveTokensFloor": 0,
+                          "reserveTokens": 4096,
+                          "keepRecentTokens": 6000
+                        }
                       },
                       "list": [
                         {
