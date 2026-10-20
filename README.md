@@ -111,6 +111,12 @@ What is true today:
 - **Ollama will spread one model across every GPU it can see,** including the one driving your monitor. SovereignClaw pins it with `CUDA_DEVICE_ORDER=PCI_BUS_ID` and `CUDA_VISIBLE_DEVICES`.
 - **k3s detects the NVIDIA runtime by itself** when the container toolkit is installed first. No containerd config editing is needed; the `nvidia` RuntimeClass appears on its own.
 
+## Roadmap
+
+- **Talk to him aloud: local voice input.** A sealed, offline speech-to-text service (Whisper via Speaches, model downloaded once, then cut off from the internet) and a push-to-talk "Throne Room" page. You speak, he hears locally, thinks locally, and George answers aloud automatically. Your voice never touches anything with internet access. OpenClaw's built-in Talk button only supports cloud voice services, so SovereignClaw leaves it unconfigured.
+- **Seal the text conversation too.** An egress filter so the agent can reach the web for tasks but can never send the conversation to cloud AI or speech services: enforced by the network, not just by configuration.
+- **An add-on contract.** A documented way for add-ons to contribute skills and settings without editing SovereignClaw.
+
 ## Licence
 
 TBD
