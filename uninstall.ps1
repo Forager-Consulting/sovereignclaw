@@ -2,7 +2,7 @@
 <#
 .SYNOPSIS
     Razes SovereignClaw completely: unregisters the 'sovereignclaw' WSL2
-    distro (cluster, Secrets, models, and Lord Clawsworth's memories).
+    distro (cluster, Secrets, models, and Sir Clawsalot's memories).
 
 .PARAMETER KeepRootfs
     Keep the cached Ubuntu rootfs (~200 MB) for a faster reinstall.

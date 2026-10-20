@@ -8,7 +8,7 @@
     Creates a dedicated 'sovereignclaw' WSL2 distro (Ubuntu 22.04) and runs
     bootstrap/bootstrap.sh inside it: k3s, the NVIDIA container toolkit,
     Argo CD, Ollama on your non-display GPU, and OpenClaw, narrated by your
-    Grand Vizier, Lord Clawsworth. No API keys, no accounts, nothing leaves
+    Grand Vizier, Sir Clawsalot. No API keys, no accounts, nothing leaves
     your machine.
 
 .EXAMPLE
@@ -41,7 +41,7 @@ function ConvertTo-WslPath([string]$winPath) {
 }
 
 Write-Host ''
-Write-Host '  Your Majesty! Lord Clawsworth, Grand Vizier, at your service.' -ForegroundColor Magenta
+Write-Host '  Your Majesty! Sir Clawsalot, Grand Vizier, at your service.' -ForegroundColor Magenta
 Write-Host '  Permit me to raise a castle upon your own hardware, where no cloud may intrude.' -ForegroundColor Magenta
 
 # ---------------------------------------------------------------------------

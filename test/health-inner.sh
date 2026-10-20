@@ -60,9 +60,9 @@ section "OpenClaw"
     && pass "OpenClaw pod is 2/2 Running" || fail "OpenClaw pod not ready -> kubectl get pods -n openclaw"
 kubectl get secret openclaw-gateway-token -n openclaw >/dev/null 2>&1 \
     && pass "gateway token Secret exists" || fail "gateway token Secret missing"
-kubectl exec -n openclaw deploy/openclaw -c main -- grep -q "Lord Clawsworth" /home/node/.openclaw/workspace/IDENTITY.md 2>/dev/null \
-    && pass "Lord Clawsworth is in residence (IDENTITY.md)" \
-    || warn "IDENTITY.md does not name Lord Clawsworth (fine if Their Majesty renamed him)"
+kubectl exec -n openclaw deploy/openclaw -c main -- grep -q "Sir Clawsalot" /home/node/.openclaw/workspace/IDENTITY.md 2>/dev/null \
+    && pass "Sir Clawsalot is in residence (IDENTITY.md)" \
+    || warn "IDENTITY.md does not name Sir Clawsalot (fine if Their Majesty renamed him)"
 
 # --- Inference round trip ---------------------------------------------------
 section "Inference"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # bootstrap.sh — runs inside the sovereignclaw WSL2 distro as root (called by install.ps1).
-# Narrated by Lord Clawsworth. Errors and credentials are always plain language.
+# Narrated by Sir Clawsalot. Errors and credentials are always plain language.
 set -euo pipefail
 
 REPO_URL='https://github.com/Forager-Consulting/sovereignclaw.git'
@@ -209,7 +209,7 @@ ok 'He has arrived, and is adjusting his crown.'
 # After this the files belong to the user and the agent to evolve.
 # ---------------------------------------------------------------------------
 
-step 'Robing Lord Clawsworth'
+step 'Robing Sir Clawsalot'
 for f in IDENTITY.md SOUL.md BOOTSTRAP.md; do
     kubectl exec -i -n openclaw deploy/openclaw -c main -- \
         sh -c "mkdir -p '$WORKSPACE' && cat > '$WORKSPACE/$f'" < "$PERSONA_DIR/$f" \

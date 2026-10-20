@@ -1,6 +1,6 @@
 # SovereignClaw 👑🦞
 
-> *"Your Majesty! Lord Clawsworth, Grand Vizier of the Realm, at your service. Permit me to observe that every other AI assistant sends your secrets to a foreign server. I find this* scandalous. *Here, every thought is computed within your own castle walls."*
+> *"Your Majesty! Sir Clawsalot, Grand Vizier of the Realm, at your service. Permit me to observe that every other AI assistant sends your secrets to a foreign server. I find this* scandalous. *Here, every thought is computed within your own castle walls."*
 
 **SovereignClaw is a self-hosted AI agent that lives on your Windows PC.** It runs [OpenClaw](https://docs.openclaw.ai) on a local [Ollama](https://ollama.com) model, on your own NVIDIA GPU, inside a disposable WSL2 sandbox. No API keys, no accounts, and nothing leaves your machine unless you say so.
 
@@ -10,7 +10,7 @@ Your machine. Your models. Your rules. Every man is king of his castle.
 
 ## What you get
 
-- **OpenClaw**, the agent, with a web UI at `http://localhost:18789`, served by **Lord Clawsworth**, your over-the-top and utterly devoted Grand Vizier. He knows who he is; on first run he only asks how *you* wish to be addressed.
+- **OpenClaw**, the agent, with a web UI at `http://localhost:18789`, served by **Sir Clawsalot**, your over-the-top and utterly devoted Grand Vizier. He knows who he is; on first run he only asks how *you* wish to be addressed.
 - **Ollama** running `qwen2.5:7b` with a 32K context, pinned to your **non-display GPU** so your desktop stays smooth.
 - **A sandbox you can raze.** Everything lives in one WSL2 distro named `sovereignclaw`. Uninstall removes it entirely; your Windows system is never touched.
 - **GitOps under the hood.** k3s and Argo CD keep the castle exactly as this repo describes it.
@@ -54,12 +54,12 @@ wsl -d sovereignclaw -- bash -c "kubectl get secret openclaw-gateway-token -n op
 
 | Who | What | Where |
 |---|---|---|
-| Lord Clawsworth | OpenClaw agent and UI | `openclaw` namespace, port 18789 |
+| Sir Clawsalot | OpenClaw agent and UI | `openclaw` namespace, port 18789 |
 | The Oracle | Ollama, `qwen2.5:7b` | `ollama` namespace, port 11434 |
 | The Steward | Argo CD, which syncs `clusters/local/` from this repo | `argocd` namespace |
 | The Walls | k3s, single node, Secrets encrypted at rest | the `sovereignclaw` WSL2 distro |
 
-Lord Clawsworth's personality lives in his workspace (`SOUL.md`, `IDENTITY.md`). The defaults in [`persona/`](persona/) are written once at install; after that they are yours and his to evolve.
+Sir Clawsalot's personality lives in his workspace (`SOUL.md`, `IDENTITY.md`). The defaults in [`persona/`](persona/) are written once at install; after that they are yours and his to evolve.
 
 ---
 
