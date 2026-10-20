@@ -91,6 +91,7 @@ spec:
                     "messages": {
                       "tts": {
                         "auto": "off",
+                        "timeoutMs": 120000,
                         "provider": "openai",
                         "providers": {
                           "openai": {
