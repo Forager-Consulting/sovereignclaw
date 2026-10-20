@@ -100,6 +100,14 @@ Write-OK 'Delivered.'
 # ---------------------------------------------------------------------------
 
 Write-Step 'Hiring the night watch (systemd)'
+# Mask snapd before systemd's first boot: on a fresh Ubuntu image its one-time
+# seeding can hang the boot for minutes. SovereignClaw does not use snaps.
+# Plain ln calls on purpose: shell loops/variables get mangled crossing PowerShell -> wsl.
+foreach ($unit in 'snapd.service', 'snapd.socket', 'snapd.seeded.service') {
+    wsl -d $DISTRO_NAME -- ln -sf /dev/null "/etc/systemd/system/$unit"
+    if ($LASTEXITCODE -ne 0) { Write-Fail "Could not mask $unit." }
+}
+Write-OK 'The snap peddlers are barred from the gate.'
 # Written from Windows via the UNC path: UTF-8 without BOM, LF line endings
 [System.IO.File]::WriteAllText("\\wsl.localhost\$DISTRO_NAME\etc\wsl.conf", "[boot]`nsystemd=true`n", [System.Text.UTF8Encoding]::new($false))
 Write-Say 'Restarting WSL to apply. Your other WSL distros will stop briefly.'
