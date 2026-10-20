@@ -21,11 +21,12 @@ spec:
     targetRevision: "1.5.40"
     helm:
       values: |
-        # Don't auto-install third-party ClawHub skills at pod start (unvetted
-        # code, ambiguous short names, internet dependency on every boot)
-        skills: []
-
         app-template:
+          # Don't auto-install third-party ClawHub skills at pod start (unvetted
+          # code, ambiguous short names, internet dependency on every boot).
+          # Must sit under app-template: the subchart renders SKILLS_TO_INSTALL.
+          skills: []
+
           configMaps:
             config:
               data:
