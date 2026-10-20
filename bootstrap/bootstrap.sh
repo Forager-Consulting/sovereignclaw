@@ -97,8 +97,9 @@ cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 chmod 600 ~/.kube/config
 echo 'export KUBECONFIG=~/.kube/config' >> ~/.bashrc
 
-kubectl get runtimeclass nvidia >/dev/null 2>&1 \
-    || die "k3s did not register the nvidia RuntimeClass. Is nvidia-container-runtime installed?"
+# k3s applies its built-in runtimes.yaml a few seconds after the node is Ready
+timeout 60 bash -c 'until kubectl get runtimeclass nvidia >/dev/null 2>&1; do sleep 2; done' \
+    || die "k3s did not register the nvidia RuntimeClass within 60s. Check: journalctl -u k3s | grep -i nvidia"
 ok 'The walls stand, Majesty. Not a single cloud may pass.'
 
 # ---------------------------------------------------------------------------
