@@ -30,10 +30,11 @@ Write-Host '  Open the gates! The court assembles, Majesty. This takes a minute 
 Write-Host '  Keep this window open while you hold audience. Ctrl+C to close the gates.' -ForegroundColor Magenta
 Write-Host ''
 
-while ($true) {
-    # rollout status follows pod replacements; `kubectl wait` on pods would keep
-    # waiting on a pod that a rollout already deleted.
-    wsl -d $DISTRO_NAME -- bash -c 'kubectl rollout status deployment/openclaw -n openclaw --timeout=900s >/dev/null && echo "    The throne room is open: http://localhost:18789" && kubectl port-forward svc/openclaw -n openclaw 18789:18789'
-    Write-Host '    The gate slipped its hinges (OpenClaw restarted?). Rehanging it...' -ForegroundColor Yellow
-    Start-Sleep -Seconds 3
-}
+# The reconnect loop runs inside bash, not PowerShell: a PowerShell loop would
+# survive Ctrl+C (it only kills the current wsl call). Here one Ctrl+C ends it all.
+# rollout status follows pod replacements; `kubectl wait` on pods would keep
+# waiting on a pod that a rollout already deleted.
+# No double quotes inside: Windows PowerShell 5.1 mangles them when passing args to wsl.
+wsl -d $DISTRO_NAME -- bash -c 'while true; do kubectl rollout status deployment/openclaw -n openclaw --timeout=900s >/dev/null && echo The throne room is open: http://localhost:18789 && kubectl port-forward svc/openclaw -n openclaw 18789:18789; echo The gate slipped its hinges. Rehanging it...; sleep 3; done'
+Write-Host ''
+Write-Host '  The gates are closed, Majesty. The castle will settle into slumber shortly.' -ForegroundColor Magenta
