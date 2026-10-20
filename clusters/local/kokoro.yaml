@@ -1,5 +1,7 @@
-# Kokoro — Sir Clawsalot's voice. Local text-to-speech on CPU (82M params),
-# OpenAI-compatible /v1/audio/speech on port 8880. British voices: bm_*.
+# Kokoro — Sir Clawsalot's voice. Local text-to-speech (82M params) on the
+# inference GPU, OpenAI-compatible /v1/audio/speech on port 8880. British voices: bm_*.
+# Measured on an RTX 2080 SUPER, 88-word reply: ~1s and ~1.3 GiB VRAM
+# (vs 18.6s on 8 CPU cores), so it shares the inference GPU with Ollama.
 #
 # Speech must never leave the castle: the NetworkPolicy below denies ALL
 # outbound traffic (verified: the model and voices are baked into the image,
@@ -28,20 +30,32 @@ spec:
       labels:
         app: kokoro
     spec:
+      runtimeClassName: nvidia
+      nodeSelector:
+        sovereignclaw.ai/gpu-inference: "true"
       containers:
         - name: kokoro
-          image: ghcr.io/remsky/kokoro-fastapi-cpu:v0.9.0
+          image: ghcr.io/remsky/kokoro-fastapi-gpu:v0.9.0-cu128
           ports:
             - containerPort: 8880
               name: http
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            # Same non-display GPU as Ollama (ConfigMap written by bootstrap)
+            - name: CUDA_DEVICE_ORDER
+              value: "PCI_BUS_ID"
+            - name: CUDA_VISIBLE_DEVICES
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereignclaw-gpu
+                  key: inference-gpu
           resources:
             requests:
-              cpu: 500m
+              cpu: 250m
               memory: 1Gi
             limits:
-              # Measured on a 3950X, 88-word reply: 4 cores 31s, uncapped ~10.5s.
-              # 8 balances his speed against Their Majesty's desktop.
-              cpu: "8"
+              cpu: "2"
               memory: 4Gi
           # TCP probes on purpose: while synthesising, Kokoro cannot answer HTTP
           # within a probe timeout, which marked it unready mid-sentence and

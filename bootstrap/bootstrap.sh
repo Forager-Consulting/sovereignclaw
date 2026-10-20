@@ -109,11 +109,15 @@ ok 'The walls stand, Majesty. Not a single cloud may pass.'
 step 'Assigning the royal oracle its seat'
 NODE=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
 kubectl label node "$NODE" sovereignclaw.ai/gpu-inference=true --overwrite >/dev/null
-kubectl create namespace ollama --dry-run=client -o yaml | kubectl apply -f - >/dev/null
-kubectl create configmap sovereignclaw-gpu -n ollama \
-    --from-literal=inference-gpu="$INFERENCE_GPU" \
-    --dry-run=client -o yaml | kubectl apply -f - >/dev/null
-ok "The oracle (Ollama) shall sit at GPU $INFERENCE_GPU, and nowhere else."
+# Both GPU tenants (Ollama, Kokoro) read the same choice; a ConfigMap can't be
+# referenced across namespaces, so write it into each.
+for ns in ollama kokoro; do
+    kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
+    kubectl create configmap sovereignclaw-gpu -n "$ns" \
+        --from-literal=inference-gpu="$INFERENCE_GPU" \
+        --dry-run=client -o yaml | kubectl apply -f - >/dev/null
+done
+ok "The oracle (Ollama) and the herald (Kokoro) shall sit at GPU $INFERENCE_GPU, and nowhere else."
 
 # ---------------------------------------------------------------------------
 # Helm + Argo CD
