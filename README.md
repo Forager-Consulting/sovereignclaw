@@ -42,6 +42,17 @@ The castle only runs while you want it to.
 | `.\test\health.ps1` | Inspection: checks the whole stack, read-only. |
 | `.\uninstall.ps1` | Raze it. Add `-KeepRootfs` for a faster reinstall. |
 
+**Hearing Sir Clawsalot.** Replies are text by default. His voice (RP English, synthesised locally by Kokoro) is one command away in the chat:
+
+| | |
+|---|---|
+| `/tts latest` | He reads his last reply aloud |
+| `/tts chat on` / `off` | He reads every reply in this conversation |
+| `/tts audio <text>` | He says whatever you type |
+| `/tts status` | Shows which voice engine spoke (always the local Kokoro) |
+
+The UI's **Talk** button is OpenClaw's live two-way voice, which only works with cloud providers, so SovereignClaw deliberately leaves it unconfigured.
+
 The UI asks for the **gateway token**:
 
 ```powershell

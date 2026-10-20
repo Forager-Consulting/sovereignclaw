@@ -90,7 +90,7 @@ spec:
                     },
                     "messages": {
                       "tts": {
-                        "auto": "always",
+                        "auto": "off",
                         "provider": "openai",
                         "providers": {
                           "openai": {
