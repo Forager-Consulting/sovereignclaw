@@ -211,7 +211,9 @@ ok 'He has arrived, and is adjusting his crown.'
 # ---------------------------------------------------------------------------
 
 step 'Robing Sir Clawsalot'
-for f in IDENTITY.md SOUL.md BOOTSTRAP.md; do
+# AGENTS.md replaces OpenClaw's 8 KB stock one (group-chat etiquette, cloud
+# voice tips) which drowned the persona out of a 7B model's attention.
+for f in AGENTS.md IDENTITY.md SOUL.md BOOTSTRAP.md; do
     kubectl exec -i -n openclaw deploy/openclaw -c main -- \
         sh -c "mkdir -p '$WORKSPACE' && cat > '$WORKSPACE/$f'" < "$PERSONA_DIR/$f" \
         || die "could not write $f into the OpenClaw workspace"
