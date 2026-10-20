@@ -83,6 +83,22 @@ spec:
                       "consoleStyle": "compact",
                       "redactSensitive": "tools"
                     },
+                    "messages": {
+                      "tts": {
+                        "auto": "always",
+                        "provider": "openai",
+                        "providers": {
+                          "openai": {
+                            "baseUrl": "http://kokoro.kokoro.svc.cluster.local:8880/v1",
+                            "apiKey": "local-kokoro-no-key-needed",
+                            "model": "kokoro",
+                            "voice": "bm_george",
+                            "extraBody": { "lang_code": "b" }
+                          },
+                          "microsoft": { "enabled": false }
+                        }
+                      }
+                    },
                     "tools": {
                       "profile": "full",
                       "web": {

@@ -1,0 +1,90 @@
+# Kokoro — Sir Clawsalot's voice. Local text-to-speech on CPU (82M params),
+# OpenAI-compatible /v1/audio/speech on port 8880. British voices: bm_*.
+#
+# Speech must never leave the castle: the NetworkPolicy below denies ALL
+# outbound traffic (verified: the model and voices are baked into the image,
+# so it starts and speaks fully offline) and admits inbound only from OpenClaw.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kokoro
+  labels:
+    app.kubernetes.io/managed-by: argocd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kokoro
+  namespace: kokoro
+  labels:
+    app: kokoro
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kokoro
+  template:
+    metadata:
+      labels:
+        app: kokoro
+    spec:
+      containers:
+        - name: kokoro
+          image: ghcr.io/remsky/kokoro-fastapi-cpu:v0.9.0
+          ports:
+            - containerPort: 8880
+              name: http
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "4"        # leave the rest of the 3950X to Their Majesty's desktop
+              memory: 4Gi
+          readinessProbe:
+            httpGet:
+              path: /v1/audio/voices
+              port: 8880
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /v1/audio/voices
+              port: 8880
+            initialDelaySeconds: 60
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kokoro
+  namespace: kokoro
+  labels:
+    app: kokoro
+spec:
+  type: ClusterIP
+  selector:
+    app: kokoro
+  ports:
+    - name: http
+      port: 8880
+      targetPort: 8880
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kokoro-sealed
+  namespace: kokoro
+spec:
+  podSelector:
+    matchLabels:
+      app: kokoro
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openclaw
+      ports:
+        - port: 8880
+  egress: []
