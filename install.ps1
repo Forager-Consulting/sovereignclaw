@@ -65,6 +65,16 @@ try {
     Write-Fail 'nvidia-smi not found. Install NVIDIA drivers >= 525 from https://www.nvidia.com/drivers'
 }
 
+# The distro's virtual disk grows on demand. If the host drive fills mid-install,
+# ext4 inside goes emergency read-only and the distro is ruined.
+$MIN_FREE_GB = 40
+$drive  = (Split-Path -Qualifier $env:LOCALAPPDATA).TrimEnd(':')
+$freeGB = [math]::Round((Get-PSDrive $drive).Free / 1GB, 1)
+if ($freeGB -lt $MIN_FREE_GB) {
+    Write-Fail "Only $freeGB GB free on ${drive}:. SovereignClaw needs at least $MIN_FREE_GB GB (cluster images + ~5 GB model + headroom). Free some space and re-run."
+}
+Write-OK "$freeGB GB free on ${drive}:. Ample room for a castle."
+
 $exists = $false
 try { $exists = ((wsl -d $DISTRO_NAME -- echo 'ok' 2>&1) -join '') -match 'ok' } catch { }
 if ($exists) { Write-Fail "A '$DISTRO_NAME' WSL2 distro already exists. Run .\uninstall.ps1 first." }
