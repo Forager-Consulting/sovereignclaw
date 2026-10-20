@@ -106,12 +106,13 @@ Write-Say 'Restarting WSL to apply. Your other WSL distros will stop briefly.'
 wsl --shutdown
 Start-Sleep -Seconds 5
 
-$ready = $false
-for ($i = 0; $i -lt 45; $i++) {
-    if ((wsl -d $DISTRO_NAME -- systemctl is-system-running 2>&1) -match 'running|degraded') { $ready = $true; break }
-    Start-Sleep -Seconds 2
+# One call with --wait: WSL stops the distro moments after each command exits,
+# so repeated short probes would each cold-boot it and always see 'starting'.
+$state = wsl -d $DISTRO_NAME -- timeout 120 systemctl is-system-running --wait 2>&1
+if (-not ($state -match 'running|degraded')) {
+    $pid1 = wsl -d $DISTRO_NAME -- cat /proc/1/comm 2>&1
+    Write-Fail "systemd did not finish booting (state: $state; PID 1: $pid1). Try: wsl --update"
 }
-if (-not $ready) { Write-Fail 'systemd did not start within 90 seconds. Try: wsl --update' }
 Write-OK 'The watch is posted.'
 
 # ---------------------------------------------------------------------------
