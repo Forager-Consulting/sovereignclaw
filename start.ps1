@@ -31,7 +31,9 @@ Write-Host '  Keep this window open while you hold audience. Ctrl+C to close the
 Write-Host ''
 
 while ($true) {
-    wsl -d $DISTRO_NAME -- bash -c 'kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=openclaw -n openclaw --timeout=900s >/dev/null && echo "    The throne room is open: http://localhost:18789" && kubectl port-forward svc/openclaw -n openclaw 18789:18789'
+    # rollout status follows pod replacements; `kubectl wait` on pods would keep
+    # waiting on a pod that a rollout already deleted.
+    wsl -d $DISTRO_NAME -- bash -c 'kubectl rollout status deployment/openclaw -n openclaw --timeout=900s >/dev/null && echo "    The throne room is open: http://localhost:18789" && kubectl port-forward svc/openclaw -n openclaw 18789:18789'
     Write-Host '    The gate slipped its hinges (OpenClaw restarted?). Rehanging it...' -ForegroundColor Yellow
     Start-Sleep -Seconds 3
 }
