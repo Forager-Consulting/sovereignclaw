@@ -1,0 +1,12 @@
+# Secrets never live in the repo
+.env
+.env.*
+*.key
+kubeconfig
+*.kubeconfig
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

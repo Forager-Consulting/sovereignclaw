@@ -1,0 +1,117 @@
+# Argo CD Application — OpenClaw agent, wired to the local Ollama
+#
+# Chart: serhanekicii/openclaw-helm (bjw-s app-template underneath).
+# To upgrade: change targetRevision and push — Argo CD reconciles automatically.
+#
+# The chart ignores helm values for container env, so bootstrap.sh injects
+# OPENCLAW_GATEWAY_TOKEN and OLLAMA_API_KEY with a strategic merge patch;
+# ignoreDifferences below stops Argo CD reverting it.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openclaw
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://serhanekicii.github.io/openclaw-helm
+    chart: openclaw
+    targetRevision: "1.5.40"
+    helm:
+      values: |
+        # Don't auto-install third-party ClawHub skills at pod start (unvetted
+        # code, ambiguous short names, internet dependency on every boot)
+        skills: []
+
+        app-template:
+          configMaps:
+            config:
+              data:
+                openclaw.json: |
+                  {
+                    "gateway": {
+                      "port": 18789,
+                      "mode": "local",
+                      "trustedProxies": ["10.0.0.1"]
+                    },
+                    "browser": {
+                      "enabled": true,
+                      "defaultProfile": "default",
+                      "profiles": {
+                        "default": {
+                          "cdpUrl": "http://localhost:9222",
+                          "color": "#4285F4"
+                        }
+                      }
+                    },
+                    "agents": {
+                      "defaults": {
+                        "workspace": "/home/node/.openclaw/workspace",
+                        "model": {
+                          "primary": "ollama/qwen2.5:7b"
+                        },
+                        "userTimezone": "UTC",
+                        "timeoutSeconds": 600,
+                        "maxConcurrent": 1
+                      },
+                      "list": [
+                        {
+                          "id": "main",
+                          "default": true,
+                          "identity": {
+                            "name": "OpenClaw",
+                            "emoji": "🦞"
+                          }
+                        }
+                      ]
+                    },
+                    "session": {
+                      "scope": "per-sender",
+                      "store": "/home/node/.openclaw/sessions",
+                      "reset": {
+                        "mode": "idle",
+                        "idleMinutes": 60
+                      }
+                    },
+                    "logging": {
+                      "level": "info",
+                      "consoleLevel": "info",
+                      "consoleStyle": "compact",
+                      "redactSensitive": "tools"
+                    },
+                    "tools": {
+                      "profile": "full",
+                      "web": {
+                        "search": { "enabled": false },
+                        "fetch": { "enabled": true }
+                      }
+                    },
+                    "models": {
+                      "providers": {
+                        "ollama": {
+                          "apiKey": "OLLAMA_API_KEY",
+                          "baseUrl": "http://ollama.ollama.svc.cluster.local:11434",
+                          "api": "ollama"
+                        }
+                      }
+                    }
+                  }
+
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: openclaw
+      namespace: openclaw
+      jsonPointers:
+        - /spec/template/spec/containers/1/env
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openclaw
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

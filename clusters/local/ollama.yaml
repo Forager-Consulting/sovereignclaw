@@ -1,0 +1,146 @@
+# Ollama — local GPU inference server
+#
+# Native Ollama API at http://ollama.ollama.svc.cluster.local:11434 (in-cluster only).
+# GPU access: k3s auto-registers the `nvidia` runtime + RuntimeClass when it finds
+# nvidia-container-runtime at startup (bootstrap installs the toolkit first).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ollama
+  labels:
+    app.kubernetes.io/managed-by: argocd
+---
+# Model weights survive pod restarts
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-models
+  namespace: ollama
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: ollama
+  labels:
+    app: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      runtimeClassName: nvidia
+      nodeSelector:
+        sovereignclaw.ai/gpu-inference: "true"
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          ports:
+            - containerPort: 11434
+              name: http
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            # Pin inference to one GPU (without this Ollama splits the model across
+            # all GPUs, including the one driving your monitor). PCI_BUS_ID makes
+            # CUDA numbering match nvidia-smi; bootstrap writes the non-display index.
+            - name: CUDA_DEVICE_ORDER
+              value: "PCI_BUS_ID"
+            - name: CUDA_VISIBLE_DEVICES
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereignclaw-gpu
+                  key: inference-gpu
+            - name: OLLAMA_HOST
+              value: "0.0.0.0"
+            # Ollama's default context (4K on 8GB cards) silently truncates
+            # OpenClaw's ~16K-token prompt, dropping its system prompt and tools.
+            - name: OLLAMA_CONTEXT_LENGTH
+              value: "32768"
+            # Fits 32K context for a 7B Q4 model in ~5.2 GiB on one 8GB card
+            - name: OLLAMA_FLASH_ATTENTION
+              value: "1"
+            - name: OLLAMA_KV_CACHE_TYPE
+              value: "q8_0"
+          resources:
+            limits:
+              memory: 10Gi
+            requests:
+              cpu: 500m
+              memory: 2Gi
+          volumeMounts:
+            - name: models
+              mountPath: /root/.ollama
+          livenessProbe:
+            httpGet:
+              path: /api/tags
+              port: 11434
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/tags
+              port: 11434
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: ollama-models
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: ollama
+  labels:
+    app: ollama
+spec:
+  type: ClusterIP
+  selector:
+    app: ollama
+  ports:
+    - name: http
+      port: 11434
+      targetPort: 11434
+---
+# Pull the default model once after sync (no-op if already present)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ollama-pull-qwen25
+  namespace: ollama
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: pull
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Ollama to be ready..."
+              until curl -sf http://ollama.ollama.svc.cluster.local:11434/api/tags; do
+                sleep 5
+              done
+              echo "Pulling qwen2.5:7b (~4.7GB)..."
+              curl -sf http://ollama.ollama.svc.cluster.local:11434/api/pull \
+                -d '{"name":"qwen2.5:7b"}' \
+                --no-buffer
+              echo "Pull complete."

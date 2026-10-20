@@ -1,0 +1,5 @@
+# Everything is LF (bash, YAML, Markdown run inside WSL/containers) except Windows entry points.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
