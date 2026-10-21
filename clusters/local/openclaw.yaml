@@ -106,7 +106,8 @@ spec:
                       }
                     },
                     "tools": {
-                      "profile": "full",
+                      "profile": "minimal",
+                      "alsoAllow": ["memory_search", "memory_get", "tts"],
                       "web": {
                         "search": { "enabled": false },
                         "fetch": { "enabled": true }
