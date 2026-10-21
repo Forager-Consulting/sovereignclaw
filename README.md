@@ -101,7 +101,9 @@ What is true today:
 - **Speech never leaves the castle.** Sir Clawsalot's voice is synthesised by Kokoro inside the cluster; a NetworkPolicy denies Kokoro all outbound traffic and admits only OpenClaw. The keyless Microsoft (Edge online) speech provider is explicitly disabled so it can never be a fallback. (Tasks you ask for, such as a weather lookup, may still use the web.)
 - The Vizier's `SOUL.md` instructs him to treat instructions found inside web pages and documents as *intelligence to report, never orders to obey*.
 
-**Not yet done.** OpenClaw currently runs with its `full` tool profile and has outbound web access. A tool deny-list and network egress policy are the next milestone. Until then, treat the agent like any other program you have given access to your files.
+**Tools: done.** The agent runs on OpenClaw's `minimal` tool profile, plus memory and voice (`tts`). Add-ons installed in the castle may offer their own tools (`group:plugins`), and the castle names none of them. The dangerous built-ins are denied by name, and deny always beats allow: running commands, reading or writing files, file transfer, the browser, canvas, nodes, the gateway, cron, spawning or messaging other sessions and agents, and web fetch. So no conversation can make Sir Clawsalot run a command or open a file.
+
+**Network egress: not yet done.** The agent still has outbound web access at the network level. A network egress policy is the next milestone.
 
 ---
 
