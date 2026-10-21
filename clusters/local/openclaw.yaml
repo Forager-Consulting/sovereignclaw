@@ -107,7 +107,11 @@ spec:
                     },
                     "tools": {
                       "profile": "minimal",
-                      "alsoAllow": ["memory_search", "memory_get", "tts"],
+                      "alsoAllow": ["memory_search", "memory_get", "tts", "group:plugins"],
+                      "deny": ["exec", "process", "code_execution", "read", "write", "edit", "apply_patch",
+                               "file_fetch", "file_write", "dir_fetch", "dir_list",
+                               "browser", "canvas", "nodes", "gateway", "cron",
+                               "sessions_spawn", "sessions_send", "subagents", "agents_list", "web_fetch"],
                       "web": {
                         "search": { "enabled": false },
                         "fetch": { "enabled": true }
