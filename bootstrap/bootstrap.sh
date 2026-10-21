@@ -224,6 +224,12 @@ for f in AGENTS.md IDENTITY.md SOUL.md BOOTSTRAP.md; do
 done
 ok 'Robed, briefed, and insufferably pleased with himself.'
 
+step 'Barring the gate to strange plugins'
+bash "$(dirname "$0")/castle-plugins.sh" || die 'could not set plugins.allow'
+kubectl rollout restart deployment/openclaw -n openclaw >/dev/null
+kubectl rollout status deployment/openclaw -n openclaw --timeout=600s </dev/null >/dev/null
+ok 'Only plugins the castle names may enter.'
+
 # ---------------------------------------------------------------------------
 # Done — print the Argo CD password ONCE, in plain language
 # ---------------------------------------------------------------------------
