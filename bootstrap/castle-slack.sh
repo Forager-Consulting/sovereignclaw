@@ -20,8 +20,10 @@ SLACK_PLUGIN='@openclaw/slack@2026.5.22'   # must match the gateway's OpenClaw v
 ROTATE="${1:-}"
 oc() { kubectl exec -n openclaw deploy/openclaw -c main -- "$@" </dev/null; }
 
-if ! oc openclaw plugins list 2>/dev/null | grep -q '@openclaw/slack\|│ slack'; then
-  oc sh -c "openclaw plugins install '$SLACK_PLUGIN' 2>&1 | tail -2"
+# npm's default cache (~/.npm) is not writable in the pod, so cache and logs go to /tmp.
+if ! oc test -d /home/node/.openclaw/npm/node_modules/@openclaw/slack; then
+  oc sh -c "cd /tmp && npm_config_cache=/tmp/npm-cache npm_config_logs_dir=/tmp/npm-logs openclaw plugins install '$SLACK_PLUGIN' 2>&1 | grep -v '^npm notice' | tail -2"
+  oc test -d /home/node/.openclaw/npm/node_modules/@openclaw/slack || { echo "Slack plugin did not install." >&2; exit 1; }
 fi
 
 HAVE="$(oc sh -c 'cut -d= -f1 /home/node/.openclaw/.env 2>/dev/null')"
