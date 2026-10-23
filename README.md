@@ -59,6 +59,14 @@ The UI asks for the **gateway token**:
 wsl -d sovereignclaw -- bash -c "kubectl get secret openclaw-gateway-token -n openclaw -o jsonpath='{.data.token}' | base64 -d"
 ```
 
+**Messaging him from Slack (optional).** Create a Slack app from [`bootstrap/slack-manifest.json`](bootstrap/slack-manifest.json) (api.slack.com/apps → Create New App → From a manifest), make an app-level token (`connections:write`), install the app to your workspace, then run inside the distro:
+
+```powershell
+wsl -d sovereignclaw -u root -- env KUBECONFIG=/etc/rancher/k3s/k3s.yaml bash bootstrap/castle-slack.sh
+```
+
+It asks for both tokens without showing them. Then DM the bot: he answers with a pairing code, and only people you approve (`openclaw pairing approve slack <code>`) can talk to him. Direct messages only; channels are off. **This is the one place the conversation leaves the PC:** Socket Mode opens only an outbound connection (nothing is exposed), but what you write to him and what he answers pass through Slack.
+
 > *Why does the castle close when the window does? WSL stops a distro shortly after its last session ends. Rather than fight that, SovereignClaw embraces it: nothing runs in the background unless you open the gates.*
 
 ## The court
@@ -94,7 +102,7 @@ Add-ons such as an Argo CD Application of your own can rely on the following. Pi
 
 What is true today:
 
-- **Everything is local.** No cloud model, no API keys, no telemetry configured by SovereignClaw.
+- **Everything is local.** No cloud model, no API keys, no telemetry configured by SovereignClaw. The one opt-in exception is Slack (`castle-slack.sh`): if you add it, Slack messages to and from Sir Clawsalot pass through Slack.
 - **Nothing is exposed to your network.** All services are ClusterIP; the UI is reachable only through `kubectl port-forward` on `localhost`.
 - **Secrets are encrypted at rest** (`k3s --secrets-encryption`), generated at install, and never written to the repo.
 - **No third-party skills are auto-installed** at startup (`skills: []`).

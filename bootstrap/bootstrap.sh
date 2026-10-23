@@ -4,6 +4,7 @@
 set -euo pipefail
 
 REPO_URL='https://github.com/Forager-Consulting/sovereignclaw.git'
+RELEASE='v0.1.2'   # Argo CD tracks this tag, never main; bump it with each release
 PERSONA_DIR='/opt/sovereignclaw/persona'
 WORKSPACE='/home/node/.openclaw/workspace'
 
@@ -174,7 +175,7 @@ spec:
   project: default
   source:
     repoURL: ${REPO_URL}
-    targetRevision: main
+    targetRevision: ${RELEASE}
     path: clusters/local
   destination:
     server: https://kubernetes.default.svc
